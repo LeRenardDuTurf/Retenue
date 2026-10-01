@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Retenue AI — Générateur de travaux éducatifs</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar no-print">
+    <div class="brand-wrap">
+      <div class="logo" aria-hidden="true">R</div>
+      <div>
+        <div class="brand-row"><span class="brand">Retenue AI</span><span class="badge">V2.1</span></div>
+        <div class="tagline">Créer un travail de retenue pédagogique en quelques secondes.</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn subtle" id="history-btn" type="button">Historique <span id="history-count" class="count">0</span></button>
+      <button class="btn subtle" id="reset-btn" type="button">Nouveau</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="panel form-panel no-print">
+      <div class="panel-kicker">GÉNÉRATEUR</div>
+      <h1>Créer une retenue</h1>
+      <p class="lead">Renseigne seulement les éléments nécessaires. Le nom de l’élève n’est jamais envoyé à l’IA.</p>
+
+      <form id="generator-form">
+        <div class="field-grid two">
+          <label class="field">
+            <span>Niveau</span>
+            <select id="level" required>
+              <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Durée</span>
+            <select id="duration" required>
+              <option value="15">15 min</option>
+              <option value="30" selected>30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">60 min</option>
+              <option value="custom">Personnalisée</option>
+            </select>
+          </label>
+        </div>
+
+        <label id="custom-duration-wrap" class="field hidden">
+          <span>Durée personnalisée (minutes)</span>
+          <input id="custom-duration" type="number" min="10" max="120" step="5" value="30" />
+        </label>
+
+        <label class="field">
+          <span>Motif de la retenue</span>
+          <select id="reason" required>
+            <option>Violence physique</option>
+            <option>Insultes ou propos irrespectueux</option>
+            <option>Insolence envers un adulte</option>
+            <option>Bavardages répétés</option>
+            <option>Travail non fait</option>
+            <option>Non-respect des consignes</option>
+            <option>Usage du téléphone</option>
+            <option>Retards répétés</option>
+            <option>Moqueries / harcèlement</option>
+            <option>Dégradation de matériel</option>
+            <option>Autre</option>
+          </select>
+        </label>
+
+        <label id="custom-reason-wrap" class="field hidden">
+          <span>Motif personnalisé</span>
+          <input id="custom-reason" maxlength="140" placeholder="Ex. refus répété de respecter le matériel" />
+        </label>
+
+        <label class="field">
+          <span>Contexte facultatif</span>
+          <textarea id="context" maxlength="700" rows="4" placeholder="Ex. L’élève a frappé un camarade après une provocation. Reste factuel et n’indique aucun nom."></textarea>
+          <small><span id="context-count">0</span>/700 — évite les noms, adresses ou informations personnelles.</small>
+        </label>
+
+        <label class="field">
+          <span>Informations complémentaires <em class="optional">(facultatif)</em></span>
+          <textarea id="additional-info" maxlength="1000" rows="5" placeholder="Ex. Je veux que le travail insiste sur le fait de prévenir un adulte, comporte une situation concrète dans la cour et se termine par un petit engagement personnel."></textarea>
+          <small><span id="additional-info-count">0</span>/1000 — indique ici ce que tu veux ajouter, approfondir ou faire comprendre à l’élève.</small>
+        </label>
+
+        <div class="field">
+          <span>Type de travail</span>
+          <div class="segmented" role="group" aria-label="Type de travail">
+            <button class="segment active" type="button" data-style="mixte">Mixte</button>
+            <button class="segment" type="button" data-style="reflexion">Réflexion</button>
+            <button class="segment" type="button" data-style="situations">Situations</button>
+            <button class="segment" type="button" data-style="texte_questions">Texte + questions</button>
+          </div>
+          <input type="hidden" id="style" value="mixte" />
+        </div>
+
+        <div class="option-card">
+          <label class="switch-row">
+            <div><strong>Corrigé enseignant</strong><small>Ajoute une page avec les éléments attendus.</small></div>
+            <input id="correction" type="checkbox" />
+          </label>
+          <label class="switch-row">
+            <div><strong>Conserver dans l’historique</strong><small>Stockage local sur cet appareil uniquement.</small></div>
+            <input id="save-history" type="checkbox" checked />
+          </label>
+        </div>
+
+        <button class="btn primary full" type="submit" id="generate-btn">
+          <span class="btn-icon">✦</span><span id="generate-label">Générer le travail</span>
+        </button>
+        <button class="btn ghost full" type="button" id="demo-btn">Générer un exemple sans IA</button>
+      </form>
+
+      <div class="privacy-note">
+        <strong>Confidentialité</strong>
+        <p>Le document laisse les champs nom/prénom vides. Le contexte transmis à l’IA doit rester anonyme.</p>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <div class="workspace-toolbar no-print" id="preview-actions">
+        <div class="status-wrap">
+          <span id="status-dot" class="status-dot idle"></span>
+          <span id="status">Prêt à générer</span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn subtle hidden" id="edit-btn" type="button">Modifier</button>
+          <button class="btn subtle hidden" id="regen-btn" type="button">Régénérer</button>
+          <button class="btn primary hidden" id="pdf-btn" type="button">Imprimer / PDF</button>
+        </div>
+      </div>
+
+      <div class="preview-shell">
+        <div class="empty-state no-print" id="empty-state">
+          <div class="empty-icon">✦</div>
+          <h2>Ton document apparaîtra ici</h2>
+          <p>Une fois généré, tu pourras le modifier, le régénérer et l’imprimer ou l’enregistrer en PDF.</p>
+          <div class="feature-row">
+            <span>Adapté au niveau</span><span>Adapté à la durée</span><span>Prêt à imprimer</span>
+          </div>
+        </div>
+
+        <article id="worksheet" class="worksheet hidden" aria-label="Aperçu du travail de retenue">
+          <header class="worksheet-head">
+            <div>
+              <div class="school-label">TRAVAIL DE RETENUE</div>
+              <h2 id="doc-title" contenteditable="false"></h2>
+              <p id="doc-subtitle" class="doc-subtitle" contenteditable="false"></p>
+            </div>
+            <div class="meta-card">
+              <div><strong>Niveau</strong><span id="doc-level"></span></div>
+              <div><strong>Durée</strong><span id="doc-duration"></span></div>
+            </div>
+          </header>
+
+          <div class="identity-line">
+            <span>Nom / Prénom : ____________________________________</span>
+            <span>Classe : __________</span>
+            <span>Date : ____ / ____ / ______</span>
+          </div>
+
+          <div id="doc-intro" class="intro-box editable" contenteditable="false"></div>
+          <div id="doc-sections"></div>
+
+          <section class="takeaway">
+            <h3>À retenir</h3>
+            <p id="doc-takeaway" class="editable" contenteditable="false"></p>
+          </section>
+
+          <section id="doc-correction" class="correction hidden"></section>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <aside class="drawer no-print" id="history-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div><span class="panel-kicker">LOCAL</span><h2>Historique</h2></div>
+      <button class="icon-btn" id="close-history" aria-label="Fermer">×</button>
+    </div>
+    <p class="drawer-note">Les fiches ci-dessous sont enregistrées uniquement dans ce navigateur.</p>
+    <div id="history-list" class="history-list"></div>
+    <button class="btn danger full" id="clear-history" type="button">Effacer tout l’historique</button>
+  </aside>
+  <div id="backdrop" class="backdrop no-print hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
