@@ -167,3 +167,81 @@ select:focus, textarea:focus, input:focus { border-color: var(--accent); box-sha
 }
 
 .optional { font-style: normal; font-weight: 500; opacity: .62; }
+.seo-section {
+  max-width: 1400px;
+  margin: 10px auto 50px;
+  padding: 0 4vw;
+}
+
+.seo-inner {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px;
+  box-shadow: var(--shadow);
+}
+
+.seo-kicker {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  color: var(--accent);
+}
+
+.seo-inner h2 {
+  margin: 0 0 12px;
+  letter-spacing: -.03em;
+}
+
+.seo-intro {
+  max-width: 800px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.seo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.seo-grid article {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fafbfc;
+}
+
+.seo-grid h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.seo-grid p,
+.seo-how p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.seo-how {
+  margin-top: 30px;
+}
+
+@media (max-width: 700px) {
+  .seo-section {
+    padding: 0 10px;
+  }
+
+  .seo-inner {
+    padding: 24px 18px;
+  }
+
+  .seo-grid {
+    grid-template-columns: 1fr;
+  }
+}
