@@ -41,6 +41,7 @@ function getPayload() {
   const reason = reasonSelect.value === "Autre"
     ? ($("custom-reason").value.trim() || "Comportement à analyser")
     : reasonSelect.value;
+
   return {
     level: $("level").value,
     reason,
@@ -59,81 +60,211 @@ function setStatus(message, type = "idle") {
 }
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  return String(value ?? "").replace(/[&<>'"]/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"
+  }[c]));
+}
+
+function normalize(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function localProfile(reason) {
+  const r = normalize(reason);
+
+  if (/retard/.test(r)) {
+    return {
+      title: "Comprendre les retards répétés et mieux s'organiser",
+      intro: "Arriver à l'heure permet de commencer le cours dans de bonnes conditions, de ne pas manquer les premières consignes et de respecter le travail du groupe. Des retards répétés peuvent avoir plusieurs causes : préparation trop tardive, trajet mal anticipé, réveil difficile ou imprévu. L'objectif de ce travail est d'identifier les causes sur lesquelles on peut agir et de construire des solutions concrètes.",
+      sections: [
+        ["1. Comprendre les conséquences", "Réponds avec des exemples précis.", [
+          "Qu'est-ce qu'un élève peut manquer lorsqu'il arrive après le début d'un cours ?",
+          "En quoi un retard peut-il perturber son propre travail ?",
+          "En quoi des arrivées répétées après le début du cours peuvent-elles gêner la classe ?"
+        ]],
+        ["2. Identifier les causes", "Cherche des causes concrètes et réalistes.", [
+          "Quelles sont trois causes possibles de retard sur lesquelles un élève peut agir ?",
+          "Quelle différence fais-tu entre un imprévu et un manque d'anticipation ?"
+        ]],
+        ["3. Construire un plan d'organisation", "Propose des solutions que l'on peut réellement appliquer.", [
+          "Que peut-on préparer la veille pour gagner du temps le matin ?",
+          "Pourquoi prévoir une petite marge avant l'heure de départ peut-il être utile ?",
+          "Écris un mini-plan en trois étapes pour arriver à l'heure cette semaine."
+        ]]
+      ],
+      takeaway: "La ponctualité repose souvent sur l'anticipation. Préparer ses affaires, connaître son heure de départ et garder une petite marge permettent de réduire les retards."
+    };
+  }
+
+  if (/violence|frapp|bagarre|coup|bouscul/.test(r)) {
+    return {
+      title: "Comprendre la violence physique et apprendre à réagir autrement",
+      intro: "Un conflit peut provoquer de la colère, de la frustration ou un sentiment d'injustice. Ces émotions peuvent être fortes, mais elles ne justifient pas de frapper ou de mettre quelqu'un en danger. Lorsqu'une situation devient tendue, il faut chercher à stopper l'escalade, se mettre en sécurité et demander l'aide d'un adulte.",
+      sections: [
+        ["1. Comprendre les risques", "Réponds avec des phrases complètes.", [
+          "Quelles conséquences un coup peut-il avoir pour la personne touchée ?",
+          "Comment une bagarre peut-elle rendre un conflit plus grave ?",
+          "Pourquoi une provocation ne justifie-t-elle pas de répondre par la violence ?"
+        ]],
+        ["2. Réagir autrement", "Propose des réactions concrètes.", [
+          "Cite trois choses que l'on peut faire lorsqu'on sent que la colère monte.",
+          "Pourquoi s'éloigner quelques instants peut-il être utile ?",
+          "À quels adultes du collège peut-on demander de l'aide ?"
+        ]],
+        ["3. Se préparer pour la prochaine fois", "Construis une réponse réaliste.", [
+          "Imagine qu'un camarade te provoque : décris étape par étape une réaction sans violence.",
+          "Pourquoi prévenir un adulte est-il préférable à vouloir régler le problème soi-même par un coup ?"
+        ]]
+      ],
+      takeaway: "Être en colère n'autorise pas à frapper. S'éloigner, se calmer et prévenir un adulte permettent d'éviter qu'un conflit ne devienne plus grave."
+    };
+  }
+
+  if (/telephone|portable|smartphone/.test(r)) {
+    return {
+      title: "Mieux gérer l'usage du téléphone au collège",
+      intro: "Un téléphone peut être utile dans la vie quotidienne, mais au collège son usage peut détourner l'attention, interrompre le travail et créer des difficultés lorsqu'il est utilisé au mauvais moment. Ce travail porte sur les habitudes qui permettent de rester concentré et de respecter le cadre collectif.",
+      sections: [
+        ["1. Comprendre l'impact sur l'attention", "Réponds avec des exemples.", [
+          "Pourquoi une notification peut-elle faire perdre le fil d'un cours ?",
+          "En quoi regarder son téléphone peut-il aussi distraire les élèves proches ?"
+        ]],
+        ["2. Identifier les moments à risque", "Réfléchis à des situations concrètes.", [
+          "À quels moments peut-on être tenté de consulter son téléphone au collège ?",
+          "Quelles solutions permettent d'éviter cette tentation ?"
+        ]],
+        ["3. Mettre en place une stratégie", "Propose un plan simple.", [
+          "Où et comment peux-tu ranger ton téléphone pour ne pas être tenté de l'utiliser ?",
+          "Que peux-tu faire si tu attends une information réellement urgente ?"
+        ]]
+      ],
+      takeaway: "Gérer son téléphone, c'est aussi gérer son attention. Le ranger et respecter le cadre permet de rester disponible pour le travail."
+    };
+  }
+
+  if (/travail non fait|devoir|travail.*fait/.test(r)) {
+    return {
+      title: "Comprendre le travail non fait et mieux s'organiser",
+      intro: "Un travail non fait peut venir d'un oubli, d'un manque d'organisation, d'une difficulté ou d'une consigne mal comprise. L'important est d'identifier la cause réelle et de mettre en place une méthode pour éviter que la situation se répète.",
+      sections: [
+        ["1. Identifier les causes", "Analyse plusieurs possibilités.", [
+          "Quelles sont quatre raisons possibles pour lesquelles un travail peut ne pas être fait ?",
+          "Quelle différence y a-t-il entre ne pas comprendre un travail et oublier de le faire ?"
+        ]],
+        ["2. Comprendre les conséquences", "Relie tes réponses aux apprentissages.", [
+          "Qu'est-ce qu'un élève risque de moins bien comprendre s'il ne fait pas régulièrement le travail demandé ?",
+          "Pourquoi attendre le dernier moment peut-il rendre le travail plus difficile ?"
+        ]],
+        ["3. Construire une méthode", "Propose une organisation simple.", [
+          "Quel outil peux-tu utiliser pour noter les devoirs et les échéances ?",
+          "Quand faut-il demander de l'aide si une consigne n'est pas comprise ?",
+          "Écris un plan en trois étapes pour vérifier ton travail avant la prochaine échéance."
+        ]]
+      ],
+      takeaway: "S'organiser, vérifier ses échéances et demander de l'aide à temps permettent d'éviter qu'une difficulté ponctuelle se transforme en retard durable."
+    };
+  }
+
+  if (/bavard/.test(r)) {
+    return {
+      title: "Comprendre l'impact des bavardages et mieux gérer sa prise de parole",
+      intro: "Parler avec ses camarades est normal, mais les bavardages répétés pendant le travail peuvent faire perdre des informations, gêner les autres et ralentir la classe. L'objectif est d'apprendre à choisir le bon moment pour parler.",
+      sections: [
+        ["1. Comprendre les effets", "Pense à ton propre travail et à celui du groupe.", [
+          "Que peut-on manquer lorsqu'on discute pendant une explication ?",
+          "Comment des bavardages répétés peuvent-ils gêner les élèves autour ?"
+        ]],
+        ["2. Faire la différence", "Compare plusieurs situations.", [
+          "Quelle différence y a-t-il entre participer au cours et bavarder hors sujet ?",
+          "Dans quelles situations faut-il attendre avant de parler à un camarade ?"
+        ]],
+        ["3. Trouver des stratégies", "Choisis des solutions réalistes.", [
+          "Que peux-tu faire lorsqu'une remarque te vient pendant une explication ?",
+          "Quelle règle personnelle pourrais-tu essayer dès le prochain cours ?"
+        ]]
+      ],
+      takeaway: "Participer n'est pas bavarder. Savoir choisir le bon moment pour parler aide à apprendre et respecte le travail des autres."
+    };
+  }
+
+  return {
+    title: `Comprendre la situation : ${reason}`,
+    intro: `Ce travail porte sur « ${reason} ». L'objectif est de comprendre les conséquences possibles de cette situation, d'identifier ce qui peut être amélioré et de proposer des solutions réalistes pour la suite.`,
+    sections: [
+      ["1. Comprendre", "Explique avec tes propres mots.", [
+        `Explique ce que signifie « ${reason} » dans le cadre du collège.`,
+        "Quelles conséquences concrètes ce comportement ou cette difficulté peut-il avoir ?"
+      ]],
+      ["2. Chercher des solutions", "Propose des solutions adaptées au motif.", [
+        "Qu'est-ce qui pourrait être fait différemment la prochaine fois ?",
+        "Quelle solution te paraît la plus réaliste ? Explique pourquoi."
+      ]],
+      ["3. Construire un objectif", "Formule un engagement simple et vérifiable.", [
+        "Quel comportement concret peux-tu essayer d'adopter dès cette semaine ?"
+      ]]
+    ],
+    takeaway: "Comprendre les conséquences de ses choix permet de préparer une réaction plus adaptée et plus efficace pour la suite."
+  };
 }
 
 function demoWorksheet(p) {
-  const sourceText = `${p.reason} ${p.context} ${p.additionalInfo || ""}`;
-  const violence = /violence|frapp|bagarre|coup/i.test(sourceText);
-  const respect = /insult|insolen|respect|moquer|harc/i.test(sourceText);
-  const work = /travail|bavard|téléphone|retard|consigne/i.test(sourceText);
+  const profile = localProfile(p.reason);
 
-  let intro = `Une retenue n'est pas seulement un temps de sanction : elle doit permettre de comprendre ce qui s'est passé et de réfléchir à une manière plus adaptée d'agir. Ce travail porte sur « ${p.reason} ». Lis chaque consigne attentivement et réponds avec des phrases complètes. Il ne s'agit pas de chercher une excuse, mais d'identifier les conséquences possibles d'un comportement et les solutions qui peuvent éviter que la même situation se reproduise.`;
-  let takeaway = "Prendre le temps de réfléchir avant d'agir permet souvent d'éviter qu'une situation ne s'aggrave. Demander de l'aide à un adulte est une solution responsable lorsqu'un problème devient difficile à gérer seul.";
-  let sections = [
-    { heading: "1. Comprendre la situation", instructions: "Réponds précisément et avec tes propres mots.", questions: [
-      `Explique ce que signifie le motif « ${p.reason} » dans le cadre du collège.`,
-      "Quelles conséquences ce type de comportement peut-il avoir pour les autres élèves ?",
-      "Quelles conséquences peut-il avoir pour le fonctionnement de la classe ou du collège ?"
-    ]},
-    { heading: "2. Prendre du recul", instructions: "Essaie de regarder la situation depuis plusieurs points de vue.", questions: [
-      "Quelles émotions peuvent pousser quelqu'un à réagir trop vite ?",
-      "Pourquoi une réaction prise sous le coup de la colère ou de l'agacement peut-elle aggraver le problème ?",
-      "Que pourrait ressentir une autre personne présente dans cette situation ?"
-    ]},
-    { heading: "3. Trouver des alternatives", instructions: "Propose des solutions concrètes et réalistes.", questions: [
-      "Donne trois façons de réagir autrement pour éviter que la situation ne se reproduise.",
-      "À quel moment faut-il demander l'aide d'un adulte ?",
-      "Quelle solution te paraît la plus facile à mettre en pratique ? Explique pourquoi."
-    ]},
-    { heading: "4. Engagement personnel", instructions: "Formule un objectif simple que tu pourrais réellement appliquer.", questions: [
-      "La prochaine fois qu'une situation semblable se présente, quelle sera ta première réaction ?",
-      "Quelle phrase pourrais-tu te dire pour prendre quelques secondes avant d'agir ?"
-    ]}
-  ];
-
-  if (violence) {
-    intro = "Un conflit peut provoquer de la colère, de la frustration ou un sentiment d'injustice. Ressentir ces émotions est normal, mais utiliser la violence physique peut blesser quelqu'un et rendre le conflit plus grave. Lorsqu'une situation devient tendue, la priorité est de se mettre en sécurité, de s'éloigner si possible et de prévenir un adulte du collège. Demander de l'aide n'est pas une faiblesse : c'est une manière responsable d'éviter l'escalade. Ce travail te demande de réfléchir aux conséquences d'un geste violent et aux solutions possibles pour agir autrement.";
-    takeaway = "Être en colère n'autorise pas à frapper. S'éloigner, se calmer et prévenir un adulte permettent d'éviter qu'un conflit ne devienne plus grave. Demander de l'aide est une réaction responsable.";
-    sections[2].questions = [
-      "Cite trois réactions possibles lorsqu'un conflit commence, sans utiliser la violence.",
-      "À quels adultes du collège peut-on demander de l'aide ?",
-      "Pourquoi prévenir un adulte est-il préférable à vouloir régler le problème soi-même par un coup ?"
-    ];
-  } else if (respect) {
-    takeaway = "Le respect ne signifie pas être d'accord avec tout le monde. Il consiste à exprimer un désaccord sans humilier, insulter ou mettre quelqu'un en difficulté. Un adulte peut aider lorsque le conflit ne se règle pas calmement.";
-  } else if (work) {
-    takeaway = "Respecter les règles de travail permet à chacun d'apprendre dans de bonnes conditions. Lorsqu'une difficulté empêche de respecter une consigne, il vaut mieux l'expliquer et demander de l'aide plutôt que laisser le problème s'installer.";
-  }
+  let sections = profile.sections.map(([heading, instructions, questions]) => ({
+    heading,
+    instructions,
+    questions: [...questions]
+  }));
 
   if (p.additionalInfo) {
-    sections.splice(Math.min(3, sections.length), 0, {
-      heading: "Approfondissement demandé",
-      instructions: "Réponds à cette partie en tenant compte de la consigne complémentaire donnée par l’adulte.",
+    const target = sections[Math.min(1, sections.length - 1)];
+    target.questions.push(
+      `En tenant compte de la consigne suivante donnée par l'adulte — « ${p.additionalInfo} » — quelle action concrète peux-tu mettre en place ?`
+    );
+  }
+
+  if (p.duration <= 15) {
+    sections = sections.slice(0, 2);
+    sections.forEach(s => { s.questions = s.questions.slice(0, 2); });
+  }
+
+  if (p.duration >= 45) {
+    sections.push({
+      heading: `${sections.length + 1}. Rédaction`,
+      instructions: "Rédige un paragraphe organisé de 8 à 12 lignes.",
       questions: [
-        "Quelle idée importante dois-tu retenir en lien avec cette consigne complémentaire ?",
-        "Donne un exemple concret de la manière dont tu pourrais l’appliquer au collège."
+        `Explique pourquoi le motif « ${p.reason} » peut poser problème au collège, puis présente deux solutions précises pour éviter qu'il se reproduise.`
       ]
     });
   }
 
-  if (p.duration <= 15) sections = sections.slice(0, 2);
-  if (p.duration >= 45) sections.push({ heading: "5. Rédaction", instructions: "Rédige un paragraphe organisé de 8 à 12 lignes.", questions: ["Explique comment un petit problème peut devenir plus grave lorsqu'on réagit sans réfléchir, puis propose une manière de l'éviter."] });
-  if (p.duration >= 60) sections.push({ heading: "6. Bilan", instructions: "Prends du recul sur l'ensemble du travail.", questions: ["Quelles sont les deux idées les plus importantes que tu retiens ?", "Quel comportement concret peux-tu essayer d'adopter dès cette semaine ?"] });
+  if (p.duration >= 60) {
+    sections.push({
+      heading: `${sections.length + 1}. Bilan`,
+      instructions: "Termine par un objectif personnel concret.",
+      questions: [
+        "Quelles sont les deux idées les plus importantes que tu retiens de ce travail ?",
+        "Quel changement précis peux-tu essayer dès cette semaine ?"
+      ]
+    });
+  }
 
   const correction = p.correction ? [
-    "Les réponses doivent identifier des conséquences concrètes pour l'élève, les autres et le groupe.",
-    "Les alternatives attendues privilégient le calme, la prise de distance, le dialogue et le recours à un adulte.",
-    "La réflexion personnelle peut varier : l'essentiel est qu'elle soit cohérente, respectueuse et réalisable."
+    "Les réponses doivent être directement liées au motif choisi.",
+    "Les solutions proposées doivent être concrètes, réalistes et adaptées à la vie au collège.",
+    "Le bilan final doit faire apparaître un objectif personnel simple et vérifiable."
   ] : [];
 
   return {
-    title: `Réfléchir à son comportement : ${p.reason}`,
-    subtitle: `Travail de réflexion — ${p.level}`,
+    title: profile.title,
+    subtitle: `Travail éducatif — ${p.level}`,
     estimatedMinutes: p.duration,
-    intro,
+    intro: profile.intro,
     sections,
-    takeaway,
+    takeaway: profile.takeaway,
     correction
   };
 }
@@ -185,18 +316,24 @@ async function generate(payload, forceDemo = false) {
 
   try {
     if (forceDemo) throw new Error("DEMO");
+
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
     if (!res.ok) throw new Error("API indisponible");
+
     const data = await res.json();
     render(data, payload);
     setStatus("Travail généré par l’IA", "success");
   } catch (error) {
     render(demoWorksheet(payload), payload);
-    setStatus(forceDemo ? "Exemple local généré" : "IA indisponible — exemple local généré", forceDemo ? "success" : "error");
+    setStatus(
+      forceDemo ? "Exemple local généré" : "IA indisponible — exemple local généré",
+      forceDemo ? "success" : "error"
+    );
   } finally {
     $("generate-btn").disabled = false;
     $("generate-label").textContent = "Générer le travail";
@@ -207,16 +344,20 @@ function setEditMode(enabled) {
   editMode = enabled;
   $("worksheet").classList.toggle("edit-mode", enabled);
   $("edit-btn").textContent = enabled ? "Terminer" : "Modifier";
+
   document.querySelectorAll("#worksheet .editable, #doc-title, #doc-subtitle").forEach(el => {
     el.setAttribute("contenteditable", enabled ? "true" : "false");
   });
+
   if (enabled) setStatus("Mode modification activé", "idle");
   else if (lastData) setStatus("Document prêt", "success");
 }
 
 function collectEditedData() {
   if (!lastData) return null;
+
   const sectionEls = [...document.querySelectorAll("#doc-sections .section")];
+
   return {
     ...lastData,
     title: $("doc-title").textContent.trim(),
@@ -226,34 +367,61 @@ function collectEditedData() {
     sections: sectionEls.map(section => ({
       heading: section.querySelector("h3")?.textContent.trim() || "",
       instructions: section.querySelector(".instructions")?.textContent.trim() || "",
-      questions: [...section.querySelectorAll(".question")].map(q => q.textContent.replace(/^\d+\.\s*/, "").trim())
+      questions: [...section.querySelectorAll(".question")].map(q =>
+        q.textContent.replace(/^\d+\.\s*/, "").trim()
+      )
     })),
     correction: [...document.querySelectorAll("#doc-correction li")].map(li => li.textContent.trim())
   };
 }
 
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
+
 function saveHistory(data, payload) {
   const items = loadHistory();
-  items.unshift({ id: Date.now(), createdAt: new Date().toISOString(), data, payload: { ...payload, context: "", additionalInfo: "" } });
+
+  items.unshift({
+    id: Date.now(),
+    createdAt: new Date().toISOString(),
+    data,
+    payload: { ...payload, context: "", additionalInfo: "" }
+  });
+
   localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 12)));
   updateHistoryUI();
 }
+
 function updateHistoryUI() {
   const items = loadHistory();
   $("history-count").textContent = items.length;
   const list = $("history-list");
+
   if (!items.length) {
     list.innerHTML = '<div class="history-empty">Aucune fiche enregistrée pour le moment.</div>';
     return;
   }
+
   list.innerHTML = items.map(item => {
     const d = new Date(item.createdAt);
-    const when = Number.isNaN(d.getTime()) ? "" : d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-    return `<div class="history-item" data-history-id="${item.id}"><strong>${escapeHtml(item.payload.reason)}</strong><span>${escapeHtml(item.payload.level)} · ${escapeHtml(item.payload.duration)} min · ${escapeHtml(when)}</span></div>`;
+    const when = Number.isNaN(d.getTime()) ? "" : d.toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    return `<div class="history-item" data-history-id="${item.id}">
+      <strong>${escapeHtml(item.payload.reason)}</strong>
+      <span>${escapeHtml(item.payload.level)} · ${escapeHtml(item.payload.duration)} min · ${escapeHtml(when)}</span>
+    </div>`;
   }).join("");
+
   list.querySelectorAll(".history-item").forEach(el => {
     el.addEventListener("click", () => {
       const item = items.find(x => String(x.id) === el.dataset.historyId);
@@ -271,11 +439,13 @@ function openHistory() {
   $("history-drawer").setAttribute("aria-hidden", "false");
   $("backdrop").classList.remove("hidden");
 }
+
 function closeHistory() {
   $("history-drawer").classList.remove("open");
   $("history-drawer").setAttribute("aria-hidden", "true");
   $("backdrop").classList.add("hidden");
 }
+
 function resetApp() {
   form.reset();
   reasonSelect.dispatchEvent(new Event("change"));
@@ -283,30 +453,49 @@ function resetApp() {
   $("context-count").textContent = "0";
   $("additional-info-count").textContent = "0";
   $("style").value = "mixte";
-  document.querySelectorAll(".segment").forEach((x, i) => x.classList.toggle("active", i === 0));
+
+  document.querySelectorAll(".segment").forEach((x, i) => {
+    x.classList.toggle("active", i === 0);
+  });
+
   $("empty-state").classList.remove("hidden");
   $("worksheet").classList.add("hidden");
   ["edit-btn","regen-btn","pdf-btn"].forEach(id => $(id).classList.add("hidden"));
-  lastData = null; lastPayload = null; editMode = false;
+
+  lastData = null;
+  lastPayload = null;
+  editMode = false;
+
   setStatus("Prêt à générer", "idle");
 }
 
-form.addEventListener("submit", e => { e.preventDefault(); generate(getPayload()); });
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  generate(getPayload());
+});
+
 $("demo-btn").addEventListener("click", () => generate(getPayload(), true));
 $("regen-btn").addEventListener("click", () => generate(lastPayload || getPayload()));
-$("pdf-btn").addEventListener("click", () => { if (editMode) setEditMode(false); window.print(); });
+$("pdf-btn").addEventListener("click", () => {
+  if (editMode) setEditMode(false);
+  window.print();
+});
+
 $("edit-btn").addEventListener("click", () => {
   if (editMode) lastData = collectEditedData() || lastData;
   setEditMode(!editMode);
 });
+
 $("history-btn").addEventListener("click", openHistory);
 $("close-history").addEventListener("click", closeHistory);
 $("backdrop").addEventListener("click", closeHistory);
+
 $("clear-history").addEventListener("click", () => {
   if (!confirm("Effacer tout l’historique local ?")) return;
   localStorage.removeItem(HISTORY_KEY);
   updateHistoryUI();
 });
+
 $("reset-btn").addEventListener("click", resetApp);
 
 updateHistoryUI();
