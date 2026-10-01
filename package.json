@@ -1,11 +1,10 @@
 {
-  "name": "retenue-ai-v2",
+  "name": "retenue-ai",
   "version": "2.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "start": "node server.mjs",
-    "dev": "node server.mjs"
+  "engines": {
+    "node": "22.x"
   },
   "dependencies": {
     "openai": "^7.23.0"
